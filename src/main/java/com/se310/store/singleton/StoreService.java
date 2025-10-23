@@ -24,7 +24,6 @@ public class StoreService {
     private static final Map<String, Basket> basketMap;
     private static final Map<String, Device> deviceMap;
 
-
     // Initialize maps
     static {
         storeMap = new HashMap<>();
