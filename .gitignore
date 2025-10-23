@@ -1,0 +1,26 @@
+# Maven
+/target/
+# Compiled class files
+**/*.class
+# IntelliJ
+.idea/
+*.iml
+# VS Code
+.vscode/
+# macOS
+.DS_Store
+# Logs
+*.log
+# Temporary files
+*~
+*.swp
+# junit reports
+/surefire-reports/
+# dependency caches
+/.mvn/wrapper/
+
+
+
+
+
+

@@ -1,5 +1,8 @@
 package com.se310.store.factory;
 
+import com.se310.store.model.Product;
+import com.se310.store.model.Temperature;
+
 /**
  * Factory Pattern implementation for creating Product objects
  *
@@ -7,8 +10,54 @@ package com.se310.store.factory;
  * @version 1.0
  * @since   2025-09-25
  */
+
 public class ProductFactory {
 
-    //TODO: Implement Factory Pattern for creating discounted, premium and standard products
+    public enum ProductType {
+        STANDARD,
+        DISCOUNTED,
+        PREMIUM
+    }
 
+    public static Product createProduct(ProductType type,
+                                        String id,
+                                        String name,
+                                        String description,
+                                        String size,
+                                        String category,
+                                        double basePrice,
+                                        Temperature temperature) {
+
+        //argument validation
+        if (type == null)
+            throw new IllegalArgumentException("Product type cannot be null");
+        if (id == null || id.isBlank())
+            throw new IllegalArgumentException("Product id cannot be null or blank");
+        if (name == null || name.isBlank())
+            throw new IllegalArgumentException("Product name cannot be null or blank");
+        if (category == null || category.isBlank())
+            throw new IllegalArgumentException("Product category cannot be null or blank");
+        if (basePrice < 0)
+            throw new IllegalArgumentException("Base price cannot be negative");
+        if (temperature == null)
+            throw new IllegalArgumentException("Temperature must be specified");
+
+            
+        switch (type) {
+            case STANDARD:
+                // Return standard product
+                return new Product(id, name, description, size, category, basePrice, temperature);
+
+            case DISCOUNTED:
+                // Return discounted product (10% off)
+                return new Product(id, name + " (Discounted)", description, size, category, basePrice * 0.9, temperature);
+
+            case PREMIUM:
+                // Return premium product (20% markup)
+                return new Product(id, name + " (Premium)", description, size, category, basePrice * 1.2, temperature);
+
+            default:
+                throw new IllegalArgumentException("Unknown product type: " + type);
+        }
+    }
 }
