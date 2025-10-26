@@ -15,12 +15,12 @@ import com.se310.store.model.CustomerType;
 public class CustomerFactory {
     //TODO: Implement Customer Factory for creating guests and registered customers
 
-    public static Customer createRegistered(String firstName, String lastName,
+    public static Customer createRegistered(String firstName, String lastName, // not strictly necessary but helps doc users
         String email, String accountAddress) {
     return createCustomer(null, firstName, lastName, CustomerType.registered, email, accountAddress);
     }
-
-    public static Customer createGuest(String firstName, String lastName) {
+ 
+    public static Customer createGuest(String firstName, String lastName) { // not strictly necessary but helps doc users
         return createCustomer(null, firstName, lastName, CustomerType.guest, null, null);
     }
 
