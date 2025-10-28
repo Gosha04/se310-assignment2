@@ -17,7 +17,7 @@ public class StoreService {
 
     //TODO: Implement Thread Safe Double-Checked Locking Singleton Pattern
 
-    private static StoreService instance;
+    public static StoreService instance;
     private StoreService() {}
 
     public static StoreService getInstance() {

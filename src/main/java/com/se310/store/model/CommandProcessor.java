@@ -21,7 +21,8 @@ import java.util.regex.Pattern;
  */
 public class CommandProcessor implements CommandAPI  {
 
-    StoreService storeService = new StoreService();
+    //StoreService storeService = new StoreService();
+    StoreService storeService = StoreService.getInstance();
 
     public void processCommand(String commandBefore) throws CommandException, StoreException {
 
