@@ -17,6 +17,20 @@ public class StoreService {
 
     //TODO: Implement Thread Safe Double-Checked Locking Singleton Pattern
 
+    private static StoreService instance;
+    private StoreService() {}
+
+    public static StoreService getInstance() {
+        if (instance == null) {
+            synchronized (StoreService.class) {
+                if (instance == null) {
+                    instance = new StoreService();
+                }
+            }
+        }
+        return instance;
+    }
+
     private static final Map<String, Store> storeMap;
     private static final Map<String, Customer> customerMap;
     private static final Map<String, Product> productMap;
