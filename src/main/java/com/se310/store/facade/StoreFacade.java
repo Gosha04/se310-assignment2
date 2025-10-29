@@ -1,5 +1,7 @@
 package com.se310.store.facade;
 
+import org.apache.velocity.runtime.parser.Token;
+
 import com.se310.store.factory.CustomerFactory;
 import com.se310.store.factory.ProductFactory;
 import com.se310.store.factory.ProductFactory.ProductType;
@@ -24,21 +26,15 @@ public class StoreFacade {
 
     public Customer defineCustomer(String id, String first, String last, CustomerType type,
                                    String email, String account, String token) throws StoreException {
-        // Create via CustomerFactory
-        Customer c = CustomerFactory.createCustomer(id, first, last, type, email, account);
-
         // Delegate to proxy for provisioning (includes token validation)
-        return service.provisionCustomer(
-                c.getId(),
-                c.getFirstName(),
-                c.getLastName(),
-                type,
-                c.getEmail(),
-                c.getAccountAddress(),
-                token
-        );
+        return service.provisionCustomer(id, first, last, type, email, account, token);
     }
 
+    public Product defineProduct (String storeId, String name, String desc, String size, String category, Double price,
+     Temperature temp, String token) throws StoreException{
+        Product p = ProductFactory.createProduct(storeId, name, desc, size, category, price, temp);
+        return service.provisionProduct(storeId, name, desc, size, category, price, temp, token);
+    }
 
     public Aisle defineAisle(String storeId, String aisleNumber, String name, String description,
                              AisleLocation location, String token) throws StoreException {

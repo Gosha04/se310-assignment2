@@ -10,11 +10,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.velocity.runtime.parser.Token;
-
 import com.se310.store.facade.StoreFacade;
 import com.se310.store.proxy.StoreServiceProxy;
-import com.se310.store.singleton.StoreService;
 
 
 // Chain of responsibility between Facade and Proxy, proxy called 'next' in chain
@@ -71,7 +68,7 @@ public class CommandProcessor implements CommandAPI  {
 
         } else if(command.toLowerCase().contains("define product")) {
 
-            facade.defineAisle(tokens.get(2), tokens.get(4), tokens.get(6),
+            facade.defineProduct(tokens.get(2), tokens.get(4), tokens.get(6),
                     tokens.get(8), tokens.get(10), Double.parseDouble(tokens.get(12)),
                     Temperature.valueOf(tokens.get(14)),TOKEN);
 

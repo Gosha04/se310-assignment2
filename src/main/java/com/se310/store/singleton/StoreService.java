@@ -3,6 +3,8 @@ package com.se310.store.singleton;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.se310.store.factory.CustomerFactory;
+import com.se310.store.factory.ProductFactory;
 import com.se310.store.model.*;
 
 /**
@@ -222,7 +224,7 @@ public class StoreService {
 
     public Product provisionProduct(String productId, String name, String description, String size, String category,
                                     double price, Temperature temperature, String token) throws StoreException {
-        Product product = new Product(productId, name, description, size, category, price, temperature);
+        Product product = ProductFactory.createProduct(productId, name, description, size, category, price, temperature);
 
         //Check to see if Product already exists
         if (productMap.putIfAbsent(productId, product) != null)
@@ -244,7 +246,7 @@ public class StoreService {
                                       CustomerType type, String email, String address, String token)
             throws StoreException {
 
-        Customer customer = new Customer(customerId, firstName, lastName, type, email, address);
+        Customer customer = CustomerFactory.createCustomer(customerId, firstName, lastName, type, email, address);
         //Check to see if the Customer already exists
         if(customerMap.putIfAbsent(customerId, customer) != null)
             throw new StoreException("Provision Customer", "Customer Already Exists");
