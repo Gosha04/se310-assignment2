@@ -1,4 +1,5 @@
 package com.se310.store.model;
+
 /**
  * Appliance class implementation representing Appliance Device in the Store
  *
@@ -7,7 +8,6 @@ package com.se310.store.model;
  * @since   2025-09-25
  */
 public class Appliance extends Device{
-
     //TODO: Implement Observer notification related to event processing
     //TODO: Implement Observer notification related to command processing
 
@@ -29,6 +29,7 @@ public class Appliance extends Device{
     @Override
     public void processEvent(String event) {
         System.out.println("Processing Event : " + event);
+        emitEvent(event);
     }
 
     /**
@@ -38,5 +39,12 @@ public class Appliance extends Device{
      */
     public void processCommand(String command){
         System.out.println("<<< " + "Processing Command : " + command);
+        try {
+            // ... do command ...
+            emitEvent("CMD " + command + " status=OK");
+        } catch (Exception ex) {
+            emitAlert("CMD " + command + " status=FAIL error=" + ex.getMessage());
+            throw ex;
+        }      
     }
 }

@@ -9,8 +9,22 @@ package com.se310.store.observer;
  * @since   2025-09-25
  */
 public class AlertMonitor implements Observer {
+    public static AlertMonitor instance;
+    private AlertMonitor () {};
+
     @Override
-    public void onStoreUpdate(String eventType) {
-        System.out.println("[CRITICAL] " + eventType);
+    public void onStoreUpdate(String event) {
+        System.out.println("[CRITICAL] " + event);
+    }
+
+    public static AlertMonitor getInstance() {
+        if (instance == null) {
+            synchronized (AlertMonitor.class) {
+                if (instance == null) {
+                    instance = new AlertMonitor();
+                }
+            }
+        }
+        return instance;
     }
 }

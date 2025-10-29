@@ -108,17 +108,12 @@ public class StoreNotifier implements Observable{
         }
     }
     
-    public void publish(String eventType) {
-        this.lastEventType = eventType;
+    public void publish(String event) {
+        this.lastEventType = event;
         notifyObs();
     }
 
     public int getObsCount() {
         return observers.size();
     }
-
-    public EventLogger createEventLogger() {
-        return new EventLogger();
-    }
-    
 }

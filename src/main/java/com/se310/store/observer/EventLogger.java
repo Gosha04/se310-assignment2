@@ -12,8 +12,23 @@ import java.util.logging.Logger;
 public class EventLogger implements Observer{
     //TODO: Implement Event Logger to log device events to console
     private static final Logger LOGGER = Logger.getLogger(EventLogger.class.getName());
-        @Override
-        public void onStoreUpdate(String eventType) {
-            LOGGER.info("[Event] " + eventType);
-        }
+
+    public static EventLogger instance;
+    private EventLogger () {};
+    
+    @Override
+    public void onStoreUpdate(String event) {
+        LOGGER.info("[Event] " + event);
     }
+
+    public static EventLogger getInstance() {
+        if (instance == null) {
+            synchronized (EventLogger.class) {
+                if (instance == null) {
+                    instance = new EventLogger();
+                }
+            }
+        }
+        return instance;
+    }
+}

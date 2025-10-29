@@ -1,5 +1,9 @@
 package com.se310.store.observer;
 
+import java.util.HashMap;
+import java.util.Map;
+
+
 /**
  * Concrete Observer that tracks statistics about device events
  *
@@ -9,15 +13,41 @@ package com.se310.store.observer;
  * @since   2025-09-25
  */
 public class DeviceStatistics implements Observer {
-    //TODO: Implement Device Statistics stores and prints out event and command counts
-    private String deviceName;
+    private int totalEvents = 0;
 
-    public void setDeviceName(String devName) {
-        this.deviceName = devName;
-    }
+    private final Map<String, Integer> commandCount = new HashMap<>();
 
     @Override
-    public void onStoreUpdate(String eventType) {
-        System.out.printf("[%s Count] " + eventType, deviceName);
+    public void onStoreUpdate(String event) {
+        totalEvents++;
+
+        commandCount.merge(event, 1, Integer::sum);
+
+        System.out.printf("[%s] %s -> count=%d, total=%d, commands=%d%n",
+                event, commandCount.get(event), totalEvents);
+    }
+
+    public int getTotalEvents() {
+        return totalEvents;
+    }
+
+    public int getCountFor(String event) {
+        return commandCount.getOrDefault(event, 0);
+    }
+
+    public Map<String, Integer> getCounts() {
+        return new HashMap<>(commandCount);
+    }
+
+    public void reset() {
+        totalEvents = 0;
+        commandCount.clear();
+    }
+
+    public void printSummary() {
+        System.out.printf("===  Stats ===%n");
+        System.out.printf("Total events  : %d%n", totalEvents);
+        System.out.println("By type:");
+        commandCount.forEach((t, c) -> System.out.printf("  %s : %d%n", t, c));
     }
 }

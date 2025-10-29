@@ -1,7 +1,5 @@
 package com.se310.store.model;
 
-import com.se310.store.singleton.StoreService;
-
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -12,6 +10,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.se310.store.observer.AlertMonitor;
+import com.se310.store.observer.EventLogger;
+import com.se310.store.observer.StoreNotifier;
+import com.se310.store.singleton.StoreService;
+
 /**
  * CommandProcessor class implementation for processing DSL commands
  *
@@ -20,9 +23,17 @@ import java.util.regex.Pattern;
  * @since   2025-09-25
  */
 public class CommandProcessor implements CommandAPI  {
+    private StoreNotifier storeNotifier = StoreNotifier.getInstance();
+    private EventLogger eventLogger = EventLogger.getInstance();
+    private AlertMonitor alertMonitor = AlertMonitor.getInstance();
 
     //StoreService storeService = new StoreService();
     StoreService storeService = StoreService.getInstance();
+
+    public CommandProcessor () {
+        storeNotifier.attach(alertMonitor);
+        storeNotifier.attach(eventLogger);
+    }
 
     public void processCommand(String commandBefore) throws CommandException, StoreException {
 
