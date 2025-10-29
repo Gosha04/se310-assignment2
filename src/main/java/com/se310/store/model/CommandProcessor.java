@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.velocity.runtime.parser.Token;
+
+import com.se310.store.facade.StoreFacade;
+import com.se310.store.proxy.StoreServiceProxy;
 import com.se310.store.singleton.StoreService;
 
 
@@ -23,8 +27,9 @@ import com.se310.store.singleton.StoreService;
  */
 public class CommandProcessor implements CommandAPI  {
     //StoreService storeService = new StoreService();
-    StoreService storeService = StoreService.getInstance();
-
+    private static final String TOKEN = "admin";
+    private final StoreServiceProxy proxy = new StoreServiceProxy();
+    private final StoreFacade facade = new StoreFacade();
 
     public void processCommand(String commandBefore) throws CommandException, StoreException {
 
@@ -39,131 +44,170 @@ public class CommandProcessor implements CommandAPI  {
         String command = commandBefore.trim().replaceAll(" +", " ");
 
         if (command.toLowerCase().contains("define store")){
-            storeService.provisionStore(tokens.get(2), tokens.get(4), tokens.get(6), null);
+            facade.defineStore(tokens.get(2), tokens.get(4), tokens.get(6), TOKEN);
         } else if(command.toLowerCase().contains("show store")){
-            System.out.println("<<< " + storeService.showStore(tokens.get(2),null));
+            System.out.println("<<< " + proxy.showStore(tokens.get(2),TOKEN));
         } else if(command.toLowerCase().contains("define aisle")){
 
             String[] location = tokens.get(2).split(":");
-            storeService.provisionAisle(location[0],location[1], tokens.get(4), tokens.get(6),
-                    AisleLocation.valueOf(tokens.get(8)),null);
+            facade.defineAisle(location[0],location[1], tokens.get(4), tokens.get(6),
+                    AisleLocation.valueOf(tokens.get(8)),TOKEN);
 
         } else if(command.toLowerCase().contains("show aisle")){
 
             String[] location = tokens.get(2).split(":");
-            System.out.println("<<< " + storeService.showAisle(location[0],location[1],null));
+            System.out.println("<<< " + proxy.showAisle(location[0],location[1],TOKEN));
 
         } else if(command.toLowerCase().contains("define shelf")) {
 
             String[] location = tokens.get(2).split(":");
-            storeService.provisionShelf(location[0],location[1],location[2], tokens.get(4), ShelfLevel.valueOf(tokens.get(6)),
-                    tokens.get(8), Temperature.valueOf(tokens.get(10)), null  );
+            facade.defineShelf(location[0],location[1],location[2], tokens.get(4), ShelfLevel.valueOf(tokens.get(6)),
+                    tokens.get(8), Temperature.valueOf(tokens.get(10)), TOKEN);
 
         } else if(command.toLowerCase().contains("show shelf")){
 
             String[] location = tokens.get(2).split(":");
-            System.out.println ("<<< " + storeService.showShelf(location[0], location[1], location[2], null));
+            System.out.println ("<<< " + proxy.showShelf(location[0], location[1], location[2], TOKEN));
 
         } else if(command.toLowerCase().contains("define product")) {
 
-            storeService.provisionProduct(tokens.get(2), tokens.get(4), tokens.get(6),
-                    tokens.get(8), tokens.get(10), Double.parseDouble(tokens.get(12)),
-                    Temperature.valueOf(tokens.get(14)),null);
+            String id = tokens.get(2);
+
+            int typeIdx  = tokens.indexOf("type");
+            int nameIdx  = tokens.indexOf("name");
+            int descIdx  = tokens.indexOf("description");
+            int sizeIdx  = tokens.indexOf("size");
+            int catIdx   = tokens.indexOf("category");
+            int priceIdx = tokens.indexOf("unit_price");
+            int tempIdx  = tokens.indexOf("temperature");
+
+            if (typeIdx < 0 || nameIdx < 0 || descIdx < 0 || sizeIdx < 0 ||
+                catIdx < 0 || priceIdx < 0 || tempIdx < 0) {
+                throw new CommandException(commandBefore, "Missing product fields (type/name/description/size/category/unit_price/temperature)");
+            }
+
+            String typeStr     = tokens.get(typeIdx + 1);
+            String name        = tokens.get(nameIdx + 1);
+            String description = tokens.get(descIdx + 1);
+            String size        = tokens.get(sizeIdx + 1);
+            String category    = tokens.get(catIdx + 1);
+            double basePrice   = Double.parseDouble(tokens.get(priceIdx + 1));
+            Temperature temperature = Temperature.valueOf(tokens.get(tempIdx + 1).toUpperCase());
+
+            
+            facade.defineProduct(typeStr, id, name, description, size, category, basePrice, temperature, TOKEN);
 
         } else if(command.toLowerCase().contains("show product")) {
 
-            Product product = storeService.showProduct(tokens.get(2), null);
+            Product product = proxy.showProduct(tokens.get(2), TOKEN);
             System.out.println("<<< " + product);
 
         } else if(command.toLowerCase().contains("define inventory")) {
 
             String[] location = tokens.get(4).split(":");
 
-            storeService.provisionInventory(tokens.get(2), location[0], location[1],
+            facade.defineInventory(tokens.get(2), location[0], location[1],
                     location[2], Integer.parseInt(tokens.get(6)), Integer.parseInt(tokens.get(8)),
-                    tokens.get(12), InventoryType.valueOf(tokens.get(10)), null);
+                    tokens.get(12), InventoryType.valueOf(tokens.get(10)), TOKEN);
 
         } else if(command.toLowerCase().contains("show inventory")) {
 
-            System.out.println("<<< " + storeService.showInventory(tokens.get(2), null));
+            System.out.println("<<< " + proxy.showInventory(tokens.get(2), TOKEN));
 
         } else if(command.toLowerCase().contains("update inventory")) {
 
-            Inventory inventory = storeService.updateInventory(tokens.get(2),Integer.parseInt(tokens.get(4)), null );
+            Inventory inventory = proxy.updateInventory(tokens.get(2),Integer.parseInt(tokens.get(4)), TOKEN);
             System.out.println(inventory);
 
         } else if(command.toLowerCase().contains("define customer")){
 
-            storeService.provisionCustomer(tokens.get(2), tokens.get(4), tokens.get(6),
-                    CustomerType.valueOf(tokens.get(8)), tokens.get(10), tokens.get(12), null);
+            String id = tokens.get(2);
+
+            int firstIdx = tokens.indexOf("first_name");
+            int lastIdx  = tokens.indexOf("last_name");
+            int typeIdx  = tokens.indexOf("type");
+            if (firstIdx < 0 || lastIdx < 0 || typeIdx < 0) {
+                throw new CommandException(commandBefore, "Missing fields: first_name/last_name/type");
+            }
+
+            String first   = tokens.get(firstIdx + 1);
+            String last    = tokens.get(lastIdx + 1);
+            String typeStr = tokens.get(typeIdx + 1);
+
+            int emailIdx = tokens.indexOf("email_address");
+            int acctIdx  = tokens.indexOf("account");
+            String email = (emailIdx >= 0 && emailIdx + 1 < tokens.size()) ? tokens.get(emailIdx + 1) : null;
+            String acct  = (acctIdx  >= 0 && acctIdx  + 1 < tokens.size()) ? tokens.get(acctIdx  + 1) : null;
+
+            facade.defineCustomer(id, first, last, typeStr, email, acct, TOKEN);
 
         } else if(command.toLowerCase().contains("update customer")){
 
             String[] location = tokens.get(4).split(":");
-            Customer customer = storeService.updateCustomer(tokens.get(2), location[0], location[1], null);
+            Customer customer = proxy.updateCustomer(tokens.get(2), location[0], location[1], TOKEN);
 
             System.out.println("<<< " + customer);
 
         } else if(command.toLowerCase().contains("show customer")){
 
-            System.out.println(storeService.showCustomer(tokens.get(2),null));
+            System.out.println(proxy.showCustomer(tokens.get(2),TOKEN));
 
         } else if(command.toLowerCase().contains("define basket")){
 
-            storeService.provisionBasket(tokens.get(2), null);
+            proxy.provisionBasket(tokens.get(2), TOKEN);
 
         } else if(command.toLowerCase().contains("assign basket")){
 
-            storeService.assignCustomerBasket(tokens.get(4), tokens.get(2), null);
+            proxy.assignCustomerBasket(tokens.get(4), tokens.get(2), TOKEN);
 
         } else if(command.toLowerCase().contains("get_customer_basket")){
 
-            Basket basket = storeService.getCustomerBasket(tokens.get(1), null);
+            Basket basket = proxy.getCustomerBasket(tokens.get(1), TOKEN);
             System.out.println("<<< " + basket);
 
         } else if (command.toLowerCase().contains("add_basket_item")){
 
-            Basket basket = storeService.addBasketProduct(tokens.get(1), tokens.get(3),
+            Basket basket = proxy.addBasketProduct(tokens.get(1), tokens.get(3),
                     Integer.parseInt(tokens.get(5)), null);
             System.out.println("<<< " + basket);
 
         } else if (command.toLowerCase().contains("remove_basket_item")) {
 
-            Basket basket = storeService.removeBasketProduct(tokens.get(1), tokens.get(3),
-                    Integer.parseInt(tokens.get(5)), null);
+            Basket basket = proxy.removeBasketProduct(tokens.get(1), tokens.get(3),
+                    Integer.parseInt(tokens.get(5)), TOKEN);
             System.out.println(basket);
 
         } else if (command.toLowerCase().contains("clear_basket")){
 
-            Basket basket = storeService.clearBasket(tokens.get(1),null);
+            Basket basket = proxy.clearBasket(tokens.get(1),TOKEN);
             System.out.println("<<< " + basket);
 
         } else if (command.toLowerCase().contains("show basket_items")){
 
-            Basket basket = storeService.showBasket(tokens.get(2),null);
+            Basket basket = proxy.showBasket(tokens.get(2),TOKEN);
             System.out.println("<<< " + basket);
 
         } else if (command.toLowerCase().contains("define device")){
 
             String[] location = tokens.get(8).split(":");
-            storeService.provisionDevice(tokens.get(2), tokens.get(4),
-                    tokens.get(6), location[0], location[1], null);
+            proxy.provisionDevice(tokens.get(2), tokens.get(4),
+                    tokens.get(6), location[0], location[1], TOKEN);
 
         } else if (command.toLowerCase().contains("show device")){
 
-            System.out.println("<<< " + storeService.showDevice(tokens.get(2),null));
+            System.out.println("<<< " + proxy.showDevice(tokens.get(2),TOKEN));
 
         } else if (command.toLowerCase().contains("create event")){
 
-            storeService.raiseEvent(tokens.get(2), tokens.get(4) + " " + tokens.get(5),null);
+            proxy.raiseEvent(tokens.get(2), tokens.get(4) + " " + tokens.get(5),TOKEN);
 
         } else if (command.toLowerCase().contains("create_event")){
 
-            storeService.raiseEvent(tokens.get(1), tokens.get(3) + " " + tokens.get(4) + " " + tokens.get(5),null);
+            proxy.raiseEvent(tokens.get(1), tokens.get(3) + " " + tokens.get(4) + " " + tokens.get(5),TOKEN);
 
         } else if (command.toLowerCase().contains("create command")){
 
-            storeService.issueCommand(tokens.get(2), tokens.get(4) + " " + tokens.get(5),null);
+            proxy.issueCommand(tokens.get(2), tokens.get(4) + " " + tokens.get(5),TOKEN);
 
         } else {
             throw new CommandException(command, "Unrecognized Command");
