@@ -51,25 +51,25 @@ public class Appliance extends Device {
     // }
 
     public void processCommand(String command) {
-        Parsed pc;
-        try { pc = parse(command); }
+        Parsed parsedCommand;
+        try { parsedCommand = parse(command); }
         catch (Exception e) { emitAlert("CMD parse_fail reason=" + e.getMessage()); return; }
 
-        CommandHandler h = handlers.get(pc.verb);
+        CommandHandler h = handlers.get(parsedCommand.verb);
         if (h == null) {
-            emitAlert("CMD " + pc.verb + " status=FAIL reason=UNKNOWN_VERB");
+            emitAlert("CMD " + parsedCommand.verb + " FAILED: UNKNOWN_VERB");
             return;
         }
         try {
-            h.handle(pc); 
-            emitEvent("CMD " + pc.verb + " params=" + pc.params);
+            h.handle(parsedCommand); 
+            emitEvent("CMD " + parsedCommand.verb + " params=" + parsedCommand.params);
         } catch (Exception ex) {
-            emitAlert("CMD " + pc.verb + " error=" + ex.getMessage());
+            emitAlert("CMD " + parsedCommand.verb + " error=" + ex.getMessage());
         }
     }
 
 
-    private interface CommandHandler { void handle(Parsed pc); }
+    private interface CommandHandler { void handle(Parsed parsedCommand); }
     private final Map<String, CommandHandler> handlers = new java.util.HashMap<>();
 
     private void initHandlers() {
@@ -104,10 +104,10 @@ public class Appliance extends Device {
 
     private class TurnstileHandlers {
         void register() {
-            handlers.put("LOCK",   pc -> turnstileLock());
-            handlers.put("UNLOCK", pc -> turnstileUnlock());
-            handlers.put("OPEN",   pc -> turnstileOpen());
-            handlers.put("CLOSE",  pc -> turnstileClose());
+            handlers.put("LOCK",   parsedCommand -> turnstileLock());
+            handlers.put("UNLOCK", parsedCommand -> turnstileUnlock());
+            handlers.put("OPEN",   parsedCommand -> turnstileOpen());
+            handlers.put("CLOSE",  parsedCommand -> turnstileClose());
         }
         void turnstileLock()  {/* ... */ }
         void turnstileUnlock(){ /* ... */ }
@@ -117,9 +117,9 @@ public class Appliance extends Device {
 
     private class RobotHandlers {
         void register() {
-            handlers.put("START",   pc -> robotStart());
-            handlers.put("STOP",    pc -> robotStop());
-            handlers.put("MOVE_TO", pc -> robotMoveTo(0,0));
+            handlers.put("START",   parsedCommand -> robotStart());
+            handlers.put("STOP",    parsedCommand -> robotStop());
+            handlers.put("MOVE_TO", parsedCommand -> robotMoveTo(0,0));
         }
         void robotStart(){}
         void robotStop(){}
@@ -128,12 +128,12 @@ public class Appliance extends Device {
 
     private class SpeakerHandlers {
         void register() {
-            handlers.put("PLAY", pc -> {
+            handlers.put("PLAY", parsedCommand -> {
                 speakerPlay("I am losing my mind", "mockTrack");
             });
-            handlers.put("STOP",       pc -> speakerStop());
-            handlers.put("MUTE",   pc -> speakerMute());
-            handlers.put("UNMUTE", pc ->  speakerUnmute()); 
+            handlers.put("STOP",       parsedCommand -> speakerStop());
+            handlers.put("MUTE",   parsedCommand -> speakerMute());
+            handlers.put("UNMUTE", parsedCommand ->  speakerUnmute()); 
         }
         void speakerPlay(String url, String track){ /* ... */ }
         void speakerStop(){ /* ... */ }
