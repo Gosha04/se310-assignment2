@@ -113,6 +113,11 @@ public class StoreServiceProxy {
         validateToken(token);
         return realService.showCustomer(id, token);
     }
+    public Customer updateCustomer(String customerId, String storeId, String aisleNumber, String token)
+        throws StoreException {
+        validateToken(token);
+        return realService.updateCustomer(customerId, storeId, aisleNumber, token);
+    }
 
     // Basket operations
     public Basket getCustomerBasket(String customerId, String token) throws StoreException {

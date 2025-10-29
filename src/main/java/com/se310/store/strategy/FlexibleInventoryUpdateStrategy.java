@@ -17,8 +17,8 @@ public class FlexibleInventoryUpdateStrategy implements InventoryUpdateStrategy{
     
     @Override
     public int applyUpdate(int capacity, int currentCount, int delta) throws StoreException {
-        long proposed = (long) currentCount + delta; // guard overflow
-        int max = (int) Math.floor(capacity * 1.2);  // allow 20% over
+        long proposed = (long) currentCount + delta;
+        int max = (int) Math.floor(capacity * 1.2);
         if (proposed < 0 || proposed > max) {
             throw new StoreException("Update Inventory", "Count must be between 0 and " + max + " (20% over capacity allowed)");
         }

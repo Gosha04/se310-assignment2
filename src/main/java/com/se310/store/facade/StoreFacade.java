@@ -22,26 +22,49 @@ public class StoreFacade {
         return service.provisionStore(storeId, name, address, token);
     }
 
-    public Product defineProduct(ProductType type, String id, String name, String description, String size,
-                                 String category, double basePrice, Temperature temperature, String token)
-            throws StoreException {
-        Product p = ProductFactory.createProduct(type, id, name, description, size, category, basePrice, temperature);
-        return service.provisionProduct(p.getId(), p.getName(), p.getDescription(), p.getSize(), p.getCategory(),
-                p.getPrice(), p.getTemperature(), token);
+    public Product defineProduct(String typeStr, String id, String name, String description, String size,
+                             String category, double basePrice, Temperature temperature, String token)
+        throws StoreException {
+    
+    ProductFactory.ProductType type;
+    try {
+        type = ProductFactory.ProductType.valueOf(typeStr.toUpperCase());
+    } catch (IllegalArgumentException e) {
+        throw new StoreException("Define Product", "Invalid product type: " + typeStr);
     }
 
-    public Customer defineRegisteredCustomer(String id, String first, String last, String email,
-                                             String account, String token) throws StoreException {
-        Customer c = CustomerFactory.createCustomer(id, first, last, CustomerType.registered, email, account);
-        return service.provisionCustomer(c.getId(), c.getFirstName(), c.getLastName(), CustomerType.registered,
-                c.getEmail(), null, token);
+   
+    Product product = ProductFactory.createProduct(type, id, name, description, size, category, basePrice, temperature);
+
+    
+    return service.provisionProduct(product.getId(), product.getName(), product.getDescription(),
+            product.getSize(), product.getCategory(), product.getPrice(), product.getTemperature(), token);
     }
 
-    public Customer defineGuestCustomer(String id, String first, String last, String token) throws StoreException {
-        Customer c = CustomerFactory.createCustomer(id, first, last, CustomerType.guest, null, null);
-        return service.provisionCustomer(c.getId(), c.getFirstName(), c.getLastName(), CustomerType.guest,
-                c.getEmail(), null, token);
+    public Customer defineCustomer(String id, String first, String last, String typeStr,
+                               String email, String account, String token) throws StoreException {
+    
+    CustomerType type;
+    try {
+        type = CustomerType.valueOf(typeStr.toLowerCase());
+    } catch (IllegalArgumentException e) {
+        throw new StoreException("Define Customer", "Invalid customer type: " + typeStr);
     }
+
+    
+    Customer c = CustomerFactory.createCustomer(id, first, last, type, email, account);
+
+    
+    return service.provisionCustomer(
+            c.getId(),
+            c.getFirstName(),
+            c.getLastName(),
+            type,
+            c.getEmail(),
+            c.getAccountAddress(),
+            token
+    );
+}
 
     public Aisle defineAisle(String storeId, String aisleNumber, String name, String description,
                              AisleLocation location, String token) throws StoreException {
