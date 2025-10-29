@@ -10,11 +10,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.se310.store.observer.AlertMonitor;
-import com.se310.store.observer.EventLogger;
-import com.se310.store.observer.StoreNotifier;
 import com.se310.store.singleton.StoreService;
 
+
+// Chain of responsibility between Facade and Proxy, proxy called 'next' in chain
 /**
  * CommandProcessor class implementation for processing DSL commands
  *
@@ -23,17 +22,9 @@ import com.se310.store.singleton.StoreService;
  * @since   2025-09-25
  */
 public class CommandProcessor implements CommandAPI  {
-    private StoreNotifier storeNotifier = StoreNotifier.getInstance();
-    private EventLogger eventLogger = EventLogger.getInstance();
-    private AlertMonitor alertMonitor = AlertMonitor.getInstance();
-
     //StoreService storeService = new StoreService();
     StoreService storeService = StoreService.getInstance();
 
-    public CommandProcessor () {
-        storeNotifier.attach(alertMonitor);
-        storeNotifier.attach(eventLogger);
-    }
 
     public void processCommand(String commandBefore) throws CommandException, StoreException {
 

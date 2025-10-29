@@ -4,11 +4,17 @@ import com.se310.store.model.Aisle;
 import com.se310.store.model.AisleLocation;
 import com.se310.store.model.Basket;
 import com.se310.store.model.Customer;
+import com.se310.store.model.CustomerType;
 import com.se310.store.model.Device;
 import com.se310.store.model.Inventory;
+import com.se310.store.model.InventoryType;
+import com.se310.store.model.Product;
+import com.se310.store.model.Shelf;
+import com.se310.store.model.ShelfLevel;
 import com.se310.store.model.Store;
 import com.se310.store.model.StoreException;
-
+import com.se310.store.model.Temperature;
+import com.se310.store.singleton.StoreService;
 /**
  * Proxy Pattern implementation for the StoreService
  * The Proxy Pattern provides a surrogate or placeholder for another object to control access to it
@@ -21,71 +27,150 @@ import com.se310.store.model.StoreException;
 public class StoreServiceProxy {
 
     //TODO: Implement Proxy Pattern allowing command execution only with a valid token
-    public interface StoreService {
-        // Aisles
-        Aisle addAisle(Store store, String aisleNumber, String name, String description, AisleLocation loc)
-        throws StoreException;
-        
-        Aisle getAisle(Store store, String aisleNumber) throws StoreException;
 
-        // Inventory
-        void addInventory(Store store, Inventory inventory) throws StoreException;
+    private final StoreService realService = StoreService.getInstance();
 
-        // Customers
-        void addCustomer(Store store, Customer customer) throws StoreException;
-        Customer getCustomer(Store store, String customerId) throws StoreException;
-        void removeCustomer(Store store, String customerId) throws StoreException;
-
-        // Devices
-        void addDevice(Store store, Device device) throws StoreException;
-
-        // Baskets
-        void addBasket(Store store, Basket basket) throws StoreException;   
+    private void validateToken(String token) throws StoreException {
+        if (token == null || !token.equals("admin")) {
+            throw new StoreException("Access Denied", "Invalid or missing authentication token");
+        }
+    }
+        // Store operations
+    public Store provisionStore(String storeId, String name, String address, String token) throws StoreException {
+        validateToken(token);
+        return realService.provisionStore(storeId, name, address, token);
     }
 
-    public static class RealStoreService implements StoreService {
-        @Override
-        public Aisle addAisle(Store store, String aisleNumber, String name, String description, AisleLocation loc)
+    public Store showStore(String storeId, String token) throws StoreException {
+        validateToken(token);
+        return realService.showStore(storeId, token);
+    }
+
+    // Aisle operations
+    public Aisle provisionAisle(String storeId, String aisleNumber, String name,
+                                String description, AisleLocation location, String token) throws StoreException {
+        validateToken(token);
+        return realService.provisionAisle(storeId, aisleNumber, name, description, location, token);
+    }
+
+    public Aisle showAisle(String storeId, String aisleNumber, String token) throws StoreException {
+        validateToken(token);
+        return realService.showAisle(storeId, aisleNumber, token);
+    }
+
+    // Shelf operations
+    public Shelf provisionShelf(String storeId, String aisleNumber, String shelfId, String name,
+                                ShelfLevel level, String description, Temperature temperature, String token)
             throws StoreException {
-        // Delegate to the domain object so duplicate checks & invariants run
-        return store.addAisle(aisleNumber, name, description, loc);
+        validateToken(token);
+        return realService.provisionShelf(storeId, aisleNumber, shelfId, name, level, description, temperature, token);
+    }
+
+    public Shelf showShelf(String storeId, String aisleNumber, String shelfId, String token) throws StoreException {
+        validateToken(token);
+        return realService.showShelf(storeId, aisleNumber, shelfId, token);
+    }
+
+    // Inventory operations
+    public Inventory provisionInventory(String inventoryId, String storeId, String aisle, String shelfId,
+                                        int capacity, int count, String productId, InventoryType type, String token)
+            throws StoreException {
+        validateToken(token);
+        return realService.provisionInventory(inventoryId, storeId, aisle, shelfId, capacity, count, productId, type, token);
+    }
+
+    public Inventory showInventory(String inventoryId, String token) throws StoreException {
+        validateToken(token);
+        return realService.showInventory(inventoryId, token);
+    }
+
+    public Inventory updateInventory(String inventoryId, int count, String token) throws StoreException {
+        validateToken(token);
+        return realService.updateInventory(inventoryId, count, token);
+    }
+
+    // Product operations
+    public Product provisionProduct(String id, String name, String description, String size,
+                                    String category, double price, Temperature temperature, String token)
+            throws StoreException {
+        validateToken(token);
+        return realService.provisionProduct(id, name, description, size, category, price, temperature, token);
+    }
+
+    public Product showProduct(String productId, String token) throws StoreException {
+        validateToken(token);
+        return realService.showProduct(productId, token);
+    }
+
+    // Customer operations
+    public Customer provisionCustomer(String id, String firstName, String lastName, CustomerType type,
+                                      String email, String accountAddress, String token) throws StoreException {
+        validateToken(token);
+        return realService.provisionCustomer(id, firstName, lastName, type, email, accountAddress, token);
+    }
+
+    public Customer showCustomer(String id, String token) throws StoreException {
+        validateToken(token);
+        return realService.showCustomer(id, token);
+    }
+
+    // Basket operations
+    public Basket getCustomerBasket(String customerId, String token) throws StoreException {
+            validateToken(token);
+            return realService.getCustomerBasket(customerId, token);
         }
 
-        @Override
-        public Aisle getAisle(Store store, String aisleNumber) throws StoreException {
-        return store.getAisle(aisleNumber);
+        public Basket provisionBasket(String basketId, String token) throws StoreException {
+            validateToken(token);
+            return realService.provisionBasket(basketId, token);
         }
 
-        @Override
-        public void addInventory(Store store, Inventory inventory) throws StoreException {
-        store.addInventory(inventory);
+        public Basket assignCustomerBasket(String customerId, String basketId, String token) throws StoreException {
+            validateToken(token);
+            return realService.assignCustomerBasket(customerId, basketId, token);
         }
 
-        @Override
-        public void addCustomer(Store store, Customer customer) throws StoreException {
-        store.addCustomer(customer);
+        public Basket addBasketProduct(String basketId, String productId, int count, String token) throws StoreException {
+            validateToken(token);
+            return realService.addBasketProduct(basketId, productId, count, token);
         }
 
-        @Override
-        public Customer getCustomer(Store store, String customerId) {
-        return store.getCustomer(customerId);
+        public Basket removeBasketProduct(String basketId, String productId, int count, String token) throws StoreException {
+            validateToken(token);
+            return realService.removeBasketProduct(basketId, productId, count, token);
         }
 
-        @Override
-        public void removeCustomer(Store store, String customerId) {
-        Customer c = store.getCustomer(customerId);
-        if (c != null) store.removeCustomer(c);
+        public Basket clearBasket(String basketId, String token) throws StoreException {
+            validateToken(token);
+            return realService.clearBasket(basketId, token);
         }
 
-        @Override
-        public void addDevice(Store store, Device device) throws StoreException {
-        store.addDevice(device);
+        public Basket showBasket(String basketId, String token) throws StoreException {
+            validateToken(token);
+            return realService.showBasket(basketId, token);
         }
 
-        @Override
-        public void addBasket(Store store, Basket basket) throws StoreException {
-        store.addBasket(basket);
-        }
+    // Device operations
+    public Device provisionDevice(String deviceId, String name, String deviceType,
+                                  String storeId, String aisleNumber, String token) throws StoreException {
+        validateToken(token);
+        return realService.provisionDevice(deviceId, name, deviceType, storeId, aisleNumber, token);
+    }
+
+    public Device showDevice(String deviceId, String token) throws StoreException {
+        validateToken(token);
+        return realService.showDevice(deviceId, token);
+    }
+
+    // Events / Commands
+    public void raiseEvent(String deviceId, String event, String token) throws StoreException {
+        validateToken(token);
+        realService.raiseEvent(deviceId, event, token);
+    }
+
+    public void issueCommand(String deviceId, String command, String token) throws StoreException {
+        validateToken(token);
+        realService.issueCommand(deviceId, command, token);
     }
     
 }
