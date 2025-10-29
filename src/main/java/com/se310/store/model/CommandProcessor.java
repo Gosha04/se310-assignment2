@@ -71,31 +71,9 @@ public class CommandProcessor implements CommandAPI  {
 
         } else if(command.toLowerCase().contains("define product")) {
 
-            String id = tokens.get(2);
-
-            int typeIdx  = tokens.indexOf("type");
-            int nameIdx  = tokens.indexOf("name");
-            int descIdx  = tokens.indexOf("description");
-            int sizeIdx  = tokens.indexOf("size");
-            int catIdx   = tokens.indexOf("category");
-            int priceIdx = tokens.indexOf("unit_price");
-            int tempIdx  = tokens.indexOf("temperature");
-
-            if (typeIdx < 0 || nameIdx < 0 || descIdx < 0 || sizeIdx < 0 ||
-                catIdx < 0 || priceIdx < 0 || tempIdx < 0) {
-                throw new CommandException(commandBefore, "Missing product fields (type/name/description/size/category/unit_price/temperature)");
-            }
-
-            String typeStr     = tokens.get(typeIdx + 1);
-            String name        = tokens.get(nameIdx + 1);
-            String description = tokens.get(descIdx + 1);
-            String size        = tokens.get(sizeIdx + 1);
-            String category    = tokens.get(catIdx + 1);
-            double basePrice   = Double.parseDouble(tokens.get(priceIdx + 1));
-            Temperature temperature = Temperature.valueOf(tokens.get(tempIdx + 1).toUpperCase());
-
-            
-            facade.defineProduct(typeStr, id, name, description, size, category, basePrice, temperature, TOKEN);
+            facade.defineAisle(tokens.get(2), tokens.get(4), tokens.get(6),
+                    tokens.get(8), tokens.get(10), Double.parseDouble(tokens.get(12)),
+                    Temperature.valueOf(tokens.get(14)),TOKEN);
 
         } else if(command.toLowerCase().contains("show product")) {
 
@@ -121,30 +99,13 @@ public class CommandProcessor implements CommandAPI  {
 
         } else if(command.toLowerCase().contains("define customer")){
 
-            String id = tokens.get(2);
-
-            int firstIdx = tokens.indexOf("first_name");
-            int lastIdx  = tokens.indexOf("last_name");
-            int typeIdx  = tokens.indexOf("type");
-            if (firstIdx < 0 || lastIdx < 0 || typeIdx < 0) {
-                throw new CommandException(commandBefore, "Missing fields: first_name/last_name/type");
-            }
-
-            String first   = tokens.get(firstIdx + 1);
-            String last    = tokens.get(lastIdx + 1);
-            String typeStr = tokens.get(typeIdx + 1);
-
-            int emailIdx = tokens.indexOf("email_address");
-            int acctIdx  = tokens.indexOf("account");
-            String email = (emailIdx >= 0 && emailIdx + 1 < tokens.size()) ? tokens.get(emailIdx + 1) : null;
-            String acct  = (acctIdx  >= 0 && acctIdx  + 1 < tokens.size()) ? tokens.get(acctIdx  + 1) : null;
-
-            facade.defineCustomer(id, first, last, typeStr, email, acct, TOKEN);
+            facade.defineCustomer(tokens.get(2), tokens.get(4), tokens.get(6),
+                    CustomerType.valueOf(tokens.get(8)), tokens.get(10), tokens.get(12), null);
 
         } else if(command.toLowerCase().contains("update customer")){
 
             String[] location = tokens.get(4).split(":");
-            Customer customer = proxy.updateCustomer(tokens.get(2), location[0], location[1], TOKEN);
+            Customer customer = proxy.updateCustomer(tokens.get(2), location[0], location[1], null);
 
             System.out.println("<<< " + customer);
 
@@ -203,7 +164,7 @@ public class CommandProcessor implements CommandAPI  {
 
         } else if (command.toLowerCase().contains("create_event")){
 
-            proxy.raiseEvent(tokens.get(1), tokens.get(3) + " " + tokens.get(4) + " " + tokens.get(5),TOKEN);
+            proxy.raiseEvent(tokens.get(1), tokens.get(3) + " " + tokens.get(4) + " " + tokens.get(5),null);
 
         } else if (command.toLowerCase().contains("create command")){
 
