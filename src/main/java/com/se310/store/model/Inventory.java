@@ -1,5 +1,9 @@
 package com.se310.store.model;
 
+import com.se310.store.strategy.FlexibleInventoryUpdateStrategy;
+import com.se310.store.strategy.InventoryUpdateStrategy;
+import com.se310.store.strategy.StandardInventoryUpdateStrategy;
+
 /**
  * Inventory class implementation representing inventory on the shelf of the store
  *
@@ -15,6 +19,11 @@ public class Inventory {
     private int count;
     private String productId;
     private InventoryType type;
+
+    private InventoryUpdateStrategy standardStrategy = new StandardInventoryUpdateStrategy();
+    private InventoryUpdateStrategy flexStrategy = new FlexibleInventoryUpdateStrategy();
+
+
 
     /**
      * Constructor for the Inventory class
@@ -121,14 +130,15 @@ public class Inventory {
      * @param count
      * @throws StoreException
      */
-    synchronized public void updateInventory(int count) throws StoreException {
+    synchronized public void updateInventory(int delta) throws StoreException {
+        int newCount;
+        if (this.type == InventoryType.flexible) {
+            newCount = flexStrategy.applyUpdate(this.capacity, this.count, delta);
+        } else {
+            newCount = standardStrategy.applyUpdate(this.capacity, this.count, delta);
+        }
 
-        //Check to see if count within proper bounds
-        if(count < 0 || (this.count + count) > capacity)
-            throw new StoreException("Update Inventory", "Inventory Is Smaller Than O " +
-                    "or Larger Than Shelf Capacity");
-
-        this.count = this.count + count;
+        this.count = newCount;
     }
 
     /**
