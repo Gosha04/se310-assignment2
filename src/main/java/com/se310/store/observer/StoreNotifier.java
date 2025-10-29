@@ -22,7 +22,7 @@ public class StoreNotifier implements Observable{
     private static final Logger LOGGER = Logger.getLogger(StoreNotifier.class.getName());
     private String lastEventType;
 
-    protected final List<Observer> observers = new ArrayList<>();
+    // protected final List<Observer> observers = Device.getObservers();
 
     public static StoreNotifier getInstance() {
         if (instance == null) {
@@ -36,7 +36,7 @@ public class StoreNotifier implements Observable{
     }
 
     @Override
-    public void attach(Observer observer) {
+    public void attach(Observer observer, List<Observer> observers) {
         Objects.requireNonNull(observer, "observer");
         if (!observers.contains(observer)) {
             observers.add(observer);
@@ -48,7 +48,7 @@ public class StoreNotifier implements Observable{
     }
 
     @Override
-    public void detach(Observer observer) {
+    public void detach(Observer observer, List<Observer> observers) {
         if (observers.remove(observer)) {
             LOGGER.info(() -> "Observer detached: " + observer.getClass().getSimpleName()
              + " (Total observers: " + observers.size() + ")");
@@ -59,24 +59,30 @@ public class StoreNotifier implements Observable{
         }
 
     @Override
-    public void notifyObs() {
+    public void notifyObs(boolean isAlert, List<Observer> observers) {
         LOGGER.info(() -> String.format("Notifying %d observer(s) of event: %s",
          observers.size(), lastEventType));
+        
+        if (isAlert) {
+            for (Observer obs : observers) {
+                if (!(obs instanceof DeviceStatistics)) {
+                    obs.onStoreUpdate(lastEventType);
+                }
+            }
+        }
         for (Observer obs : observers) {
-            try {
+            if (!(obs instanceof AlertMonitor)) {
                 obs.onStoreUpdate(lastEventType);
-            } catch (Exception e) {
-                LOGGER.severe("Error notifying observers " + obs.getClass().getSimpleName()
-                 + ": " + e.getMessage());
+                System.out.println("[StoreNotifier] " + lastEventType);
             }
         }
     }
 
-    public void killAllObs(String type) {
+    public void killAllObs(String type, List<Observer> observers) {
         List<Observer> targets = new ArrayList<>();
         switch (type) {
             case "all":
-                observers.forEach(this::detach);
+                observers.forEach(o -> this.detach(o, observers));
                 LOGGER.info("All observers killed.");
                 break;
             case "eventLog":
@@ -85,7 +91,7 @@ public class StoreNotifier implements Observable{
                         targets.add(o);
                     }
                 }
-                targets.forEach(this::detach);
+                observers.forEach(o -> this.detach(o, observers));
                 LOGGER.info(() -> "EventLogger observers killed: " + targets.size());
             case "alertMonitor":
                 for (Observer o : observers) {
@@ -93,7 +99,7 @@ public class StoreNotifier implements Observable{
                         targets.add(o);
                     }
                 }
-                targets.forEach(this::detach);
+                observers.forEach(o -> this.detach(o, observers));
                 LOGGER.info(() -> "AlertMonitor observers killed: " + targets.size());
             case "deviceStat":
                 for (Observer o : observers) {
@@ -101,19 +107,20 @@ public class StoreNotifier implements Observable{
                         targets.add(o);
                     }
                 }
-                targets.forEach(this::detach);
+                observers.forEach(o -> this.detach(o, observers));
                 LOGGER.info(() -> "AlertMonitor observers killed: " + targets.size());
             default:
                 LOGGER.warning(() -> "Unknown killAllObs type: " + type);
         }
     }
     
-    public void publish(String event) {
+    public void publishEvent(String event, List<Observer> observers) {
         this.lastEventType = event;
-        notifyObs();
+        notifyObs(false, observers);
     }
 
-    public int getObsCount() {
-        return observers.size();
+    public void publishAlert(String event, List<Observer> observers) {
+        this.lastEventType = event;
+        notifyObs(true, observers);
     }
 }

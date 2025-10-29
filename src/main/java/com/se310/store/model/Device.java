@@ -44,25 +44,29 @@ import com.se310.store.observer.StoreNotifier;
             this.storeLocation = storeLocation;
             this.type = type;
             this.observers = new ArrayList<>();
-            storeNotifier.attach(AlertMonitor.getInstance());
-            storeNotifier.attach(EventLogger.getInstance());
-            storeNotifier.attach(new DeviceStatistics());
+            storeNotifier.attach(AlertMonitor.getInstance(), observers);
+            storeNotifier.attach(EventLogger.getInstance(), observers);
+            storeNotifier.attach(new DeviceStatistics(), observers);
             
         }
 
         public void addObserver (Observer observer) {
-            storeNotifier.attach(observer);
+            storeNotifier.attach(observer, observers);
             observers.add(observer);
         }
 
         public void killAllObs (String type) {
-            storeNotifier.killAllObs(type);
+            storeNotifier.killAllObs(type, observers);
             observers.removeAll(observers);
         }
 
         public void removeObserver (Observer observer) {
-            storeNotifier.detach(observer);
+            storeNotifier.detach(observer, observers);
             observers.remove(observer);
+        }
+
+        public List<Observer> getObservers() {
+            return observers;
         }
 
         /**
@@ -146,15 +150,15 @@ import com.se310.store.observer.StoreNotifier;
         }
 
         protected void emitEvent(String msg) {
-            storeNotifier.publish("EVENT: " + enrich(msg));
+            storeNotifier.publishEvent(msg, observers);
         }
 
         protected void emitAlert(String msg) {
-            storeNotifier.publish("ALERT: " + enrich(msg));
+            storeNotifier.publishAlert(msg, observers);
         }
 
-        private String enrich(String raw) {
-            return String.format("device=%s name=%s type=%s loc=%s :: %s",
-                getId(), getName(), getType(), getStoreLocation(), raw);
-        }
+        // private String enrich(String raw) {
+        //     return String.format("device=%s name=%s type=%s loc=%s :: %s",
+        //         getId(), getName(), getType(), getStoreLocation(), raw);
+        // }
     }

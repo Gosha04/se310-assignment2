@@ -1,5 +1,6 @@
 package com.se310.store.observer;
 
+import java.util.List;
 
 /**
  * Observable interface for the Observer Pattern
@@ -14,7 +15,7 @@ public interface Observable {
     //TODO: Define Observer registration
     //TODO: Define Observer removal
     //TODO: Define Observer notification
-    void detach(Observer observer);
-    void notifyObs();
-    void attach(Observer observer);
+    void detach(Observer observer, List<Observer> observers);
+    void notifyObs(boolean isAlert, List<Observer> observers);
+    void attach(Observer observer, List<Observer> observers);
 }

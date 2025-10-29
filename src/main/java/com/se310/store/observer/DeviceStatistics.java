@@ -23,7 +23,7 @@ public class DeviceStatistics implements Observer {
 
         commandCount.merge(event, 1, Integer::sum);
 
-        System.out.printf("[%s] %s -> count=%d, total=%d, commands=%d%n",
+        System.out.printf("[%s] -> count=%d, total=%d%n",
                 event, commandCount.get(event), totalEvents);
     }
 

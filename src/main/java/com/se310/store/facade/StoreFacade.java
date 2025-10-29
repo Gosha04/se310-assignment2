@@ -10,6 +10,7 @@ import com.se310.store.proxy.StoreServiceProxy;
  * @version 1.0
  * @since   2025-09-25
  */
+
 public class StoreFacade {
 
     //TODO: Implement Facade Pattern to hiding complexities of the store, product and customer creation
