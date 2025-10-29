@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+// Chain of responsibility between Facade and Proxy, proxy called 'next' in chain
 /**
  * CommandProcessor class implementation for processing DSL commands
  *

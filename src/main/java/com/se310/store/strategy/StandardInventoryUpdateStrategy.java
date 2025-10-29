@@ -17,7 +17,7 @@ public class StandardInventoryUpdateStrategy implements InventoryUpdateStrategy{
 
     @Override
     public int applyUpdate(int capacity, int currentCount, int delta) throws StoreException {
-        long proposed = (long) currentCount + delta; // avoid int overflow
+        long proposed = (long) currentCount + delta;
         if (proposed < 0 || proposed > capacity) {
             throw new StoreException("Update Inventory", "Count must be between 0 and capacity (" + capacity + ")");
         }
