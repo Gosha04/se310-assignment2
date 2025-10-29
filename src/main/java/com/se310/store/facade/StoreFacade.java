@@ -1,10 +1,5 @@
 package com.se310.store.facade;
 
-import org.apache.velocity.runtime.parser.Token;
-
-import com.se310.store.factory.CustomerFactory;
-import com.se310.store.factory.ProductFactory;
-import com.se310.store.factory.ProductFactory.ProductType;
 import com.se310.store.model.*;
 import com.se310.store.proxy.StoreServiceProxy;
 
@@ -32,7 +27,6 @@ public class StoreFacade {
 
     public Product defineProduct (String storeId, String name, String desc, String size, String category, Double price,
      Temperature temp, String token) throws StoreException{
-        Product p = ProductFactory.createProduct(storeId, name, desc, size, category, price, temp);
         return service.provisionProduct(storeId, name, desc, size, category, price, temp, token);
     }
 
