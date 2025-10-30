@@ -156,9 +156,4 @@ import com.se310.store.observer.StoreNotifier;
         protected void emitAlert(String msg) {
             storeNotifier.publishAlert(msg, observers);
         }
-
-        // private String enrich(String raw) {
-        //     return String.format("device=%s name=%s type=%s loc=%s :: %s",
-        //         getId(), getName(), getType(), getStoreLocation(), raw);
-        // }
     }
